@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle de Fila de Atendimento</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 5px; }
+    .output { margin-top: 10px; padding: 10px; background: #f9f9f9; border: 1px solid #ccc; border-radius: 5px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Controle de Fila de Atendimento</h1>
+
+  <label for="nome">Nome:</label>
+  <input type="text" id="nome">
+  <button onclick="entrarNaFila()">Entrar na fila</button>
+  <button onclick="atender()">Atender</button>
+
+  <h2>Fila Atual</h2>
+  <div id="filaAtual" class="output">Nenhuma pessoa na fila.</div>
+
+  <h2>Histórico de Atendimento</h2>
+  <div id="historico" class="output">Nenhum atendimento realizado.</div>
+
+  <script>
+    const fila = [];
+    const historico = [];
+
+    function formatarData(timestamp) {
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "medium"
+      }).format(timestamp);
+    }
+
+    function entrarNaFila() {
+      const nome = document.getElementById("nome").value.trim();
+      if (nome === "") return;
+
+      const entrada = Date.now();
+      fila.push({ nome, entrada });
+      atualizarFila();
+      document.getElementById("nome").value = "";
+    }
+
+    function atender() {
+      if (fila.length === 0) return;
+
+      const pessoa = fila.shift();
+      const saida = Date.now();
+      const tempo = Math.floor((saida - pessoa.entrada) / 1000); // em segundos
+
+      historico.push({
+        nome: pessoa.nome,
+        entrada: formatarData(pessoa.entrada),
+        saida: formatarData(saida),
+        tempo: `${tempo} segundos`
+      });
+
+      atualizarFila();
+      atualizarHistorico();
+    }
+
+    function atualizarFila() {
+      const filaDiv = document.getElementById("filaAtual");
+      if (fila.length === 0) {
+        filaDiv.textContent = "Nenhuma pessoa na fila.";
+      } else {
+        filaDiv.textContent = fila.map(p => `${p.nome} - Entrada: ${formatarData(p.entrada)}`).join("\n");
+      }
+    }
+
+    function atualizarHistorico() {
+      const historicoDiv = document.getElementById("historico");
+      if (historico.length === 0) {
+        historicoDiv.textContent = "Nenhum atendimento realizado.";
+      } else {
+        historicoDiv.textContent = historico.map(h =>
+          `${h.nome} - Entrada: ${h.entrada} | Saída: ${h.saida} | Tempo de espera: ${h.tempo}`
+        ).join("\n");
+      }
+    }
+  </script>
+</body>
+</html>
